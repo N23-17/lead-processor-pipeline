@@ -1,7 +1,18 @@
+# Python
 __pycache__/
 *.pyc
 
-exports/
+# Logs
+logs/
 pipeline.log
 
+# Environment
 .env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

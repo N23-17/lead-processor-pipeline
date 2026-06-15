@@ -1,22 +1,34 @@
-# Lead Processor Pipeline
+Lead Processor API
 
-A modular Python ETL system that:
+A FastAPI-powered lead processing service that:
 
-- Cleans raw text input
-- Parses structured lead data
-- Validates records
-- Exports JSON and CSV
-- Logs pipeline activity
+Cleans raw text input
+Extracts structured lead data
+Validates records
+Logs processing activity
+Integrates with n8n workflows
 
-## Features
+Features
 
-- Input normalization
-- Fault-tolerant parsing
-- Validation layer
-- Export system (JSON/CSV)
-- Logging system
+FastAPI backend
+Automatic Swagger documentation
+Input validation with Pydantic
+Lead parsing engine
+Logging system
+n8n webhook integration
 
-## Usage
+Installation
+    pip install -r requirements.txt
+Run
+    python -m uvicorn app:app --reload
 
-```bash
-python main.py
+API Documentation
+
+Visit:
+
+http://127.0.0.1:8000/docs
+
+Example Request
+{
+  "raw_text": "Imran, Computer Science, 1\nJohn; IT; 2"
+}

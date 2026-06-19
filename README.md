@@ -32,3 +32,20 @@ Example Request
 {
   "raw_text": "Imran, Computer Science, 1\nJohn; IT; 2"
 }
+
+Deployment (Render)
+
+Set the following environment variables in your Render service settings:
+
+- `API_KEYS` — comma-separated API keys allowed to access the API (e.g. `dev-key-123,another-key`).
+- `N8N_WEBHOOK_URL` — optional webhook URL for n8n integration (leave empty to disable).
+
+Locally on Windows (PowerShell) set for the session:
+
+```powershell
+$env:API_KEYS = 'dev-key-123'
+$env:N8N_WEBHOOK_URL = ''
+python -m uvicorn app:app --reload
+```
+
+Verify the `x-api-key` header matches one of the values in `API_KEYS` when calling `/process`.

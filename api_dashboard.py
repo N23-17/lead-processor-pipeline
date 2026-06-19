@@ -4,7 +4,7 @@ import requests
 st.title("🚀 Lead Processor API Dashboard")
 
 # Inputs
-api_url = st.text_input("API URL", "https://leadpro-f8gm.onrender.com/docs")
+api_url = st.text_input("API URL", "https://leadpro-f8gm.onrender.com/process")
 api_key = st.text_input("API Key", "dev-key-123")
 raw_text = st.text_area("Raw Text Input", "Imran, Computer Science, 1")
 

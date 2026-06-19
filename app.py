@@ -1,11 +1,13 @@
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 import re
 import requests
 import datetime
 import os
 APP_VERSION = "1.0.0"
+VALID_KEYS = os.environ.get("API_KEYS", "").split(",")
+
 
 
 # ==================================================
@@ -33,14 +35,16 @@ class LeadInput(BaseModel):
 # ==================================================
 
 def log_message(message, level="INFO"):
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    log_entry = f"[{timestamp}] [{level}] {message}"
+    import json
 
-    print(log_entry)
+    log_entry = {
+        "timestamp": str(datetime.datetime.now()),
+        "level": level,
+        "message": message
+    }
 
-    with open("pipeline.log", "a") as file:
-        file.write(log_entry + "\n")
+    print(json.dumps(log_entry))
 
 # ==================================================
 # INPUT READER
@@ -108,30 +112,28 @@ def send_to_n8n(data):
 
     url = os.environ.get("N8N_WEBHOOK_URL")
 
-    # DEBUG (temporary but useful)
-    if not url:
-        return {
-            "status": "not_configured",
-            "debug": "N8N_WEBHOOK_URL is missing in environment"
-        }
+    payload = {
+    "source": "lead_processor_api",
+    "timestamp": str(datetime.datetime.now()),
+    "summary": data["pipeline_result"],
+    "metrics": {
+        "total": data["pipeline_result"]["total"],
+        "valid": data["pipeline_result"]["valid"],
+        "skipped": data["pipeline_result"]["skipped"]
+                }
+            }
 
-    try:
-        response = requests.post(
-            url,
-            json=data,
-            timeout=10
-        )
-
-        return {
-            "status": "sent",
-            "status_code": response.status_code
-        }
-
-    except Exception as e:
-        return {
-            "status": "failed",
-            "error": str(e)
-        }
+    if url:
+        try:
+            response = requests.post(url, json=payload, timeout=10)
+            log_message(f"Webhook sent to n8n with payload size: {len(str(payload))}")
+            return response.json()
+        except Exception as e:
+            log_message(f"Failed to send webhook: {str(e)}", "ERROR")
+            return None
+    else:
+        log_message("N8N_WEBHOOK_URL not configured", "WARNING")
+        return None
 
 # ==================================================
 # MAIN PROCESSOR
@@ -197,13 +199,15 @@ def home():
     }
 
 @app.post("/process")
-def process_endpoint(data: LeadInput):
+def process_endpoint(data: LeadInput, x_api_key: str = Header(None)):
+
+    if x_api_key != VALID_KEYS:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+
+    log_message(f"Request received: {len(data.raw_text)} chars")
 
     try:
-
-        result = process_leads(
-            data.raw_text
-        )
+        result = process_leads(data.raw_text)
 
         return {
             "success": True,
@@ -211,8 +215,4 @@ def process_endpoint(data: LeadInput):
         }
 
     except Exception as e:
-
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=500, detail=str(e))

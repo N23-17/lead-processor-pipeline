@@ -7,12 +7,6 @@ import datetime
 import os
 APP_VERSION = "1.0.0"
 
-# ==================================================
-# CONFIG
-# ==================================================
-
-# Put your n8n webhook URL here
-N8N_WEBHOOK_URL = "https://acespade.app.n8n.cloud/webhook/93ed5050-5cc8-4861-8b6e-8e709e8a845d"
 
 # ==================================================
 # FASTAPI
@@ -109,19 +103,21 @@ def validate_record(record):
 # ==================================================
 
 def send_to_n8n(data):
+    import os
+    import requests
 
-    if (
-        not N8N_WEBHOOK_URL
-        or "https://acespade.app.n8n.cloud/webhook/93ed5050-5cc8-4861-8b6e-8e709e8a845d" in N8N_WEBHOOK_URL
-    ):
+    url = os.environ.get("N8N_WEBHOOK_URL")
+
+    # DEBUG (temporary but useful)
+    if not url:
         return {
-            "status": "not_configured"
+            "status": "not_configured",
+            "debug": "N8N_WEBHOOK_URL is missing in environment"
         }
 
     try:
-
         response = requests.post(
-            N8N_WEBHOOK_URL,
+            url,
             json=data,
             timeout=10
         )
@@ -132,12 +128,6 @@ def send_to_n8n(data):
         }
 
     except Exception as e:
-
-        log_message(
-            f"n8n error: {str(e)}",
-            "ERROR"
-        )
-
         return {
             "status": "failed",
             "error": str(e)

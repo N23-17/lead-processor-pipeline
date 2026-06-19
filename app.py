@@ -12,7 +12,7 @@ APP_VERSION = "1.0.0"
 # ==================================================
 
 # Put your n8n webhook URL here
-N8N_WEBHOOK_URL = "https://acespade.app.n8n.cloud/webhook-test/93ed5050-5cc8-4861-8b6e-8e709e8a845d"
+N8N_WEBHOOK_URL = "https://acespade.app.n8n.cloud/webhook/93ed5050-5cc8-4861-8b6e-8e709e8a845d"
 
 # ==================================================
 # FASTAPI
@@ -112,7 +112,7 @@ def send_to_n8n(data):
 
     if (
         not N8N_WEBHOOK_URL
-        or "your-n8n-webhook-url" in N8N_WEBHOOK_URL
+        or "https://acespade.app.n8n.cloud/webhook/93ed5050-5cc8-4861-8b6e-8e709e8a845d" in N8N_WEBHOOK_URL
     ):
         return {
             "status": "not_configured"
